@@ -8,6 +8,8 @@ from ui import UI
 class Game:
     def __init__(self):
 
+        self.pause = False
+
         # game attributes
         self.max_level = 0
         self.max_health = 100
@@ -95,15 +97,26 @@ class Game:
                 if self.sound:
                     self.sound = False
                     self.allow_input = False
+                    self.update_volume()
                     self.input_timer()
                 else:
                     self.sound = True
                     self.allow_input = False
                     self.input_timer()
+                    self.update_volume()
+            if keys[pygame.K_TAB]:
+                if self.pause:
+                    self.pause = False
+                else:
+                    self.pause = True
 
     def input_timer(self):
         current_time = pygame.time.get_ticks()
         if current_time - self.start_time >= self.timer_length:
+            print('----')
+            print(current_time)
+            print(self.start_time)
+            print(current_time - self.start_time)
             self.allow_input = True
 
     def run(self):
@@ -111,7 +124,6 @@ class Game:
             self.overworld.run()
             self.input()
             self.ui.show_if_muted(self.sound, self.volume_gain)
-            self.input_timer()
         else:
             self.level.run()
             self.ui.show_health(self.cur_health, self.max_health)
@@ -119,7 +131,6 @@ class Game:
             self.check_game_over()
             self.input()
             self.ui.show_if_muted(self.sound, self.volume_gain)
-            self.input_timer()
 
 
 # Pygame setup
