@@ -29,6 +29,8 @@ class Game:
         self.hit_sound = pygame.mixer.Sound('venv/audio/effects/hit.wav')
         self.update_volume()
 
+        # Tkt fréro <3
+
         # overworld creation
         self.overworld = Overworld(0, self.max_level, screen, self.create_level)
         self.status = 'overworld'
