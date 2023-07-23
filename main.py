@@ -45,7 +45,7 @@ class Game:
         self.timer_length = 300
 
     def create_level(self, current_level):
-        self.level = Level(current_level, screen, self.create_overworld, self.change_coins, self.change_coins,
+        self.level = Level(current_level, screen, self.create_overworld, self.change_coins, self.change_health,
                            self.sound, self.volume_gain, self.volume_effects, self.volume_musics,
                            self.overworld_bg_music, self.level_bg_music, self.coin_sound, self.stomp_sound, self.hit_sound,
                            self.jump_sound)
