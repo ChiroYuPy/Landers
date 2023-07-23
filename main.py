@@ -1,7 +1,9 @@
-import pygame, sys
-from settings import *
+import pygame
+import sys
+
 from level import Level
 from overworld import Overworld
+from settings import *
 from ui import UI
 
 
@@ -44,10 +46,14 @@ class Game:
         self.allow_input = True
         self.timer_length = 300
 
+    def update_health(self, amount):
+        self.cur_health += amount
+
     def create_level(self, current_level):
-        self.level = Level(current_level, screen, self.create_overworld, self.change_coins, self.change_coins,
+        self.level = Level(current_level, screen, self.create_overworld, self.change_coins, self.change_health,
                            self.sound, self.volume_gain, self.volume_effects, self.volume_musics,
-                           self.overworld_bg_music, self.level_bg_music, self.coin_sound, self.stomp_sound, self.hit_sound,
+                           self.overworld_bg_music, self.level_bg_music, self.coin_sound, self.stomp_sound,
+                           self.hit_sound,
                            self.jump_sound)
         self.status = 'level'
         self.overworld_bg_music.stop()
@@ -61,20 +67,21 @@ class Game:
         self.level_bg_music.stop()
         self.overworld_bg_music.play(loops=-1)
 
-    def change_coins(self, amount):
-        self.coins += amount
-
     def change_health(self, amount):
         self.cur_health += amount
 
+    def change_coins(self, count):
+        self.coins += count
+
     def check_game_over(self):
         if self.cur_health <= 0:
-            self.cur_health = 0
+            self.cur_health = 100
             self.coins = 0
             self.max_level = 0
             self.overworld = Overworld(0, self.max_level, screen, self.create_level)
-            self.status = 'game over'
+            self.status = 'overworld'
             self.level_bg_music.stop()
+            self.overworld_bg_music.play(loops=-1)
 
     def update_volume(self):
         self.level_bg_music.set_volume(self.volume_gain * self.volume_musics * self.sound)
@@ -137,7 +144,9 @@ class Game:
 
 # Pygame setup
 pygame.init()
-pygame.display.set_caption('Landers 0.2.5')
+pygame.display.set_caption('Landers - V0.2.5')
+pygame_icon = pygame.image.load('venv\\graphics\\tilesTEST.png')
+pygame.display.set_icon(pygame_icon)
 screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
 
