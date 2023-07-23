@@ -12,8 +12,10 @@ def sin_function():
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, surface, create_jump_particles, change_health, hit_sound, jump_sound):
+    def __init__(self, pos, surface, create_jump_particles, change_health, hit_sound, jump_sound, pause):
         super().__init__()
+
+        self.pause = pause
         self.dust_run_particles = import_folder('venv/graphics/character/dust_particles/run')
         self.animations = {'idle': [], 'run': [], 'jump': [], 'fall': []}
         self.import_character_assets()
@@ -114,20 +116,21 @@ class Player(pygame.sprite.Sprite):
                 self.display_surface.blit(flipped_dust_particle, pos)
 
     def get_input(self):
-        keys = pygame.key.get_pressed()
+        if not self.pause:
+            keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_d]:
-            self.direction.x = 1
-            self.facing_right = True
-        elif keys[pygame.K_q]:
-            self.direction.x = -1
-            self.facing_right = False
-        else:
-            self.direction.x = 0
+            if keys[pygame.K_d]:
+                self.direction.x = 1
+                self.facing_right = True
+            elif keys[pygame.K_q]:
+                self.direction.x = -1
+                self.facing_right = False
+            else:
+                self.direction.x = 0
 
-        if keys[pygame.K_SPACE] and self.on_ground:
-            self.jump()
-            self.create_jump_particles(self.rect.midbottom)
+            if keys[pygame.K_SPACE] and self.on_ground:
+                self.jump()
+                self.create_jump_particles(self.rect.midbottom)
 
     def get_status(self):
         if self.direction.y < 0:

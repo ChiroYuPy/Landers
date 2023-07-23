@@ -12,8 +12,9 @@ from game_data import levels
 class Level:
     def __init__(self, current_level, surface, create_overworld, change_coins, change_health, sound, volume_gain,
                 volume_effects, volume_musics, overworld_bg_music, level_bg_music, coin_sound, stomp_sound, hit_sound,
-                 jump_sound):
+                 jump_sound, pause):
         # general setup
+        self.pause = pause
         self.display_surface = surface
         self.world_shift = 0
         self.current_x = None
@@ -136,7 +137,7 @@ class Level:
                         if val == '1': sprite = Palm(tile_size, x, y, 'venv/graphics/terrain/palm_large', 70)
 
                     if type == 'enemies':
-                        sprite = Enemy(tile_size,x,y)
+                        sprite = Enemy(tile_size,x,y, self.pause)
 
                     if type == 'constraints':
                         sprite = Tile(tile_size,x,y)
@@ -151,7 +152,8 @@ class Level:
                 x = col_index * tile_size
                 y = row_index * tile_size
                 if val == '0':
-                    sprite = Player((x,y), self.display_surface, self.create_jump_particles, change_health, self.hit_sound, self.jump_sound)
+                    sprite = Player((x,y), self.display_surface, self.create_jump_particles, change_health,
+                                    self.hit_sound, self.jump_sound, self.pause)
                     self.player.add(sprite)
                 if val == '1':
                     hat_surface = pygame.image.load('venv/graphics/character/selector.png').convert_alpha()
@@ -244,18 +246,8 @@ class Level:
 
     def input(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_ESCAPE]:
+        if keys[pygame.K_TAB]:
             self.create_overworld(self.current_level, 0)
-        if keys[pygame.K_PLUS]:
-            self.volume_gain += 0.1
-            print(self.volume_gain)
-            self.level_bg_music.set_volume(self.volume_gain * self.volume_musics * self.sound)
-        elif keys[pygame.K_MINUS]:
-            self.volume_gain -= 0.1
-            print(self.volume_gain)
-            self.overworld_bg_music.set_volume(self.volume_gain * self.volume_musics * self.sound)
-        if keys[pygame.K_p]:
-            self.sound = False
 
     def check_death(self):
         if self.player.sprite.rect.top > screen_height:

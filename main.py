@@ -12,6 +12,8 @@ class Game:
 
         self.pause = False
 
+        self.surface = pygame.Surface([screen_width, screen_height], pygame.SRCALPHA)
+
         # game attributes
         self.max_level = 0
         self.max_health = 100
@@ -53,8 +55,7 @@ class Game:
         self.level = Level(current_level, screen, self.create_overworld, self.change_coins, self.change_health,
                            self.sound, self.volume_gain, self.volume_effects, self.volume_musics,
                            self.overworld_bg_music, self.level_bg_music, self.coin_sound, self.stomp_sound,
-                           self.hit_sound,
-                           self.jump_sound)
+                           self.hit_sound, self.jump_sound, self.pause)
         self.status = 'level'
         self.overworld_bg_music.stop()
         self.level_bg_music.play(loops=-1)
@@ -118,28 +119,39 @@ class Game:
                     self.pause = False
                 else:
                     self.pause = True
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE and not self.pause:
+                print('touche ECHAP apuyée !')
+                self.pause = True
 
     def input_timer(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.start_time >= self.timer_length:
-            print('----')
-            print(current_time)
-            print(self.start_time)
-            print(current_time - self.start_time)
-            self.allow_input = True
+        if not self.allow_input:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.start_time >= self.timer_length:
+                print('----')
+                print(current_time)
+                print(self.start_time)
+                print(current_time - self.start_time)
+                self.allow_input = True
+
+    def draw_pause(self):
+        pygame.draw.rect(self.surface,(128, 128, 128, 150), [0, 0, screen_width, screen_height])
+        screen.blit(self.surface, (0, 0))
+        print('pause active')
 
     def run(self):
         if self.status == 'overworld':
             self.overworld.run()
-            self.input()
-            self.ui.show_if_muted(self.sound, self.volume_gain)
         else:
             self.level.run()
             self.ui.show_health(self.cur_health, self.max_health)
             self.ui.show_coins(self.coins)
             self.check_game_over()
-            self.input()
-            self.ui.show_if_muted(self.sound, self.volume_gain)
+        self.input_timer()
+        self.input()
+        self.ui.show_if_muted(self.sound, self.volume_gain)
+        if self.pause:
+            self.draw_pause()
 
 
 # Pygame setup

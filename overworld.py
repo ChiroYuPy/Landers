@@ -125,6 +125,10 @@ class Overworld:
         if not self.allow_input:
             current_time = pygame.time.get_ticks()
             if current_time - self.start_time >= self.timer_length:
+                print('----')
+                print(current_time)
+                print(self.start_time)
+                print(current_time - self.start_time)
                 self.allow_input = True
 
     def run(self):
