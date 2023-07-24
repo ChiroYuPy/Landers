@@ -1,7 +1,8 @@
 import pygame
+
+from decoration import Sky
 from game_data import levels
 from support import import_folder
-from decoration import Sky
 
 
 class Node(pygame.sprite.Sprite):
@@ -16,7 +17,8 @@ class Node(pygame.sprite.Sprite):
             self.status = 'locked'
         self.rect = self.image.get_rect(center=pos)
 
-        self.detection_zone = pygame.Rect(self.rect.centerx - (icon_speed / 2), self.rect.centery - (icon_speed / 2), icon_speed, icon_speed)
+        self.detection_zone = pygame.Rect(self.rect.centerx - (icon_speed / 2), self.rect.centery - (icon_speed / 2),
+                                          icon_speed, icon_speed)
 
     def animate(self):
         self.frame_index += 0.15
@@ -30,7 +32,7 @@ class Node(pygame.sprite.Sprite):
         else:
             tint_surf = self.image.copy()
             tint_surf.fill('black', None, pygame.BLEND_RGBA_MULT)
-            self.image.blit(tint_surf,(0,0))
+            self.image.blit(tint_surf, (0, 0))
 
 
 class Icon(pygame.sprite.Sprite):
@@ -125,10 +127,6 @@ class Overworld:
         if not self.allow_input:
             current_time = pygame.time.get_ticks()
             if current_time - self.start_time >= self.timer_length:
-                print('----')
-                print(current_time)
-                print(self.start_time)
-                print(current_time - self.start_time)
                 self.allow_input = True
 
     def run(self):

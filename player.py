@@ -1,6 +1,8 @@
-import pygame
-from support import import_folder
 from math import sin
+
+import pygame
+
+from support import import_folder
 
 
 def sin_function():

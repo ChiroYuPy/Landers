@@ -1,17 +1,18 @@
 import pygame
-from support import import_csv_layout, import_cut_graphics
-from settings import tile_size, screen_height, screen_width
-from tiles import Tile, StaticTile, Crate, Coin, Palm
-from enemy import Enemy
+
 from decoration import Sky, Water, Clouds
-from player import Player
-from particles import ParticleEffect
+from enemy import Enemy
 from game_data import levels
+from particles import ParticleEffect
+from player import Player
+from settings import tile_size, screen_height, screen_width
+from support import import_csv_layout, import_cut_graphics
+from tiles import Tile, StaticTile, Crate, Coin, Palm
 
 
 class Level:
     def __init__(self, current_level, surface, create_overworld, change_coins, change_health, sound, volume_gain,
-                volume_effects, volume_musics, overworld_bg_music, level_bg_music, coin_sound, stomp_sound, hit_sound,
+                 volume_effects, volume_musics, overworld_bg_music, level_bg_music, coin_sound, stomp_sound, hit_sound,
                  jump_sound, pause):
         # general setup
         self.pause = pause
@@ -60,7 +61,7 @@ class Level:
         # terrain_without_collide setup
         terrain_without_collide_layout = import_csv_layout(level_data['terrain_without_collide'])
         self.terrain_without_collide_sprites = \
-        self.create_tile_group(terrain_without_collide_layout, 'terrain_without_collide')
+            self.create_tile_group(terrain_without_collide_layout, 'terrain_without_collide')
 
         # grass_setup
         grass_layout = import_csv_layout(level_data['grass'])
@@ -84,11 +85,11 @@ class Level:
 
         # enemy
         enemy_layout = import_csv_layout(level_data['enemies'])
-        self.enemy_sprites = self.create_tile_group(enemy_layout,'enemies')
+        self.enemy_sprites = self.create_tile_group(enemy_layout, 'enemies')
 
         # constraint
         constraint_layout = import_csv_layout(level_data['constraints'])
-        self.constraint_sprites = self.create_tile_group(constraint_layout,'constraints')
+        self.constraint_sprites = self.create_tile_group(constraint_layout, 'constraints')
 
         # decoration
         self.sky = Sky(8)
@@ -112,7 +113,8 @@ class Level:
                         sprite = StaticTile(tile_size, x, y, tile_surface)
 
                     if type == 'terrain_without_collide':
-                        terrain_without_collide_tile_list = import_cut_graphics('venv/graphics/terrain/terrain_tiles.png')
+                        terrain_without_collide_tile_list = import_cut_graphics(
+                            'venv/graphics/terrain/terrain_tiles.png')
                         tile_surface = terrain_without_collide_tile_list[int(val)]
                         sprite = StaticTile(tile_size, x, y, tile_surface)
 
@@ -129,18 +131,18 @@ class Level:
                         if val == '1': sprite = Coin(tile_size, x, y, 'venv/graphics/coins/silver', 1)
 
                     if type == 'fg_palms':
-                        if val == '0': sprite = Palm(tile_size, x, y, 'venv/graphics/terrain/palm_small',38)
+                        if val == '0': sprite = Palm(tile_size, x, y, 'venv/graphics/terrain/palm_small', 38)
                         if val == '1': sprite = Palm(tile_size, x, y, 'venv/graphics/terrain/palm_large', 70)
 
                     if type == 'bg_palms':
-                        if val == '0': sprite = Palm(tile_size, x, y, 'venv/graphics/terrain/palm_small',38)
+                        if val == '0': sprite = Palm(tile_size, x, y, 'venv/graphics/terrain/palm_small', 38)
                         if val == '1': sprite = Palm(tile_size, x, y, 'venv/graphics/terrain/palm_large', 70)
 
                     if type == 'enemies':
-                        sprite = Enemy(tile_size,x,y, self.pause)
+                        sprite = Enemy(tile_size, x, y, self.pause)
 
                     if type == 'constraints':
-                        sprite = Tile(tile_size,x,y)
+                        sprite = Tile(tile_size, x, y)
 
                     sprite_group.add(sprite)
 
@@ -152,7 +154,7 @@ class Level:
                 x = col_index * tile_size
                 y = row_index * tile_size
                 if val == '0':
-                    sprite = Player((x,y), self.display_surface, self.create_jump_particles, change_health,
+                    sprite = Player((x, y), self.display_surface, self.create_jump_particles, change_health,
                                     self.hit_sound, self.jump_sound, self.pause)
                     self.player.add(sprite)
                 if val == '1':
@@ -162,14 +164,14 @@ class Level:
 
     def enemy_collision_reverse(self):
         for enemy in self.enemy_sprites.sprites():
-            if pygame.sprite.spritecollide(enemy,self.constraint_sprites,False):
+            if pygame.sprite.spritecollide(enemy, self.constraint_sprites, False):
                 enemy.reverse()
 
     def create_jump_particles(self, pos):
         if self.player.sprite.facing_right:
-            pos -= pygame.math.Vector2(10,14)
+            pos -= pygame.math.Vector2(10, 14)
         else:
-            pos += pygame.math.Vector2(10,-14)
+            pos += pygame.math.Vector2(10, -14)
 
         jump_particle_sprite = ParticleEffect(pos, 'jump')
         self.dust_sprite.add(jump_particle_sprite)
@@ -254,7 +256,7 @@ class Level:
             self.create_overworld(self.current_level, 0)
 
     def check_win(self):
-        if pygame.sprite.spritecollide(self.player.sprite,self.goal,False):
+        if pygame.sprite.spritecollide(self.player.sprite, self.goal, False):
             self.create_overworld(self.current_level, self.new_max_level)
 
     def check_coin_collisions(self):
@@ -280,7 +282,6 @@ class Level:
                 else:
                     self.player.sprite.get_damage()
 
-
     def run(self):
 
         # run the entire game / level
@@ -288,7 +289,7 @@ class Level:
 
         # sky
         self.sky.draw(self.display_surface)
-        self.clouds.draw(self.display_surface,self.world_shift)
+        self.clouds.draw(self.display_surface, self.world_shift)
 
         # terrains
         self.terrain_sprites.update(self.world_shift)

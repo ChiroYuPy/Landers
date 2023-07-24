@@ -1,12 +1,14 @@
-from settings import vertical_tile_number, tile_size, screen_width
-import pygame
-from tiles import AnimatedTile, StaticTile
-from support import import_folder
 from random import choice, randint
+
+import pygame
+
+from settings import vertical_tile_number, tile_size, screen_width
+from support import import_folder
+from tiles import AnimatedTile, StaticTile
 
 
 class Sky:
-    def __init__(self, horizon, style = 'level'):
+    def __init__(self, horizon, style='level'):
         self.top = pygame.image.load('venv/graphics/decoration/sky/sky_top.png').convert()
         self.bottom = pygame.image.load('venv/graphics/decoration/sky/sky_bottom.png').convert()
         self.middle = pygame.image.load('venv/graphics/decoration/sky/sky_middle.png').convert()
@@ -24,8 +26,8 @@ class Sky:
 
             for surface in [choice(palm_surfaces) for image in range(10)]:
                 x = randint(0, screen_width)
-                y = (self.horizon * tile_size) + randint(50,100)
-                rect = surface.get_rect(midbottom = (x, y))
+                y = (self.horizon * tile_size) + randint(50, 100)
+                rect = surface.get_rect(midbottom=(x, y))
                 self.palms.append((surface, rect))
 
             cloud_surfaces = import_folder('venv/graphics/overworld/clouds')
@@ -33,10 +35,9 @@ class Sky:
 
             for surface in [choice(cloud_surfaces) for image in range(10)]:
                 x = randint(0, screen_width)
-                y = randint(0,(self.horizon * tile_size) - 100)
-                rect = surface.get_rect(midbottom = (x, y))
+                y = randint(0, (self.horizon * tile_size) - 100)
+                rect = surface.get_rect(midbottom=(x, y))
                 self.clouds.append((surface, rect))
-
 
     def draw(self, surface):
         for row in range(vertical_tile_number):

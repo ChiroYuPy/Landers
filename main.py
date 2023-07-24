@@ -1,5 +1,6 @@
-import pygame
 import sys
+
+import pygame
 
 from level import Level
 from overworld import Overworld
@@ -10,8 +11,11 @@ from ui import UI
 class Game:
     def __init__(self):
 
+        self.restart = None
+        self.saves = None
         self.pause = False
 
+        self.font = pygame.font.Font('venv/graphics/ui/ARCADEPI.ttf', 32)
         self.surface = pygame.Surface([screen_width, screen_height], pygame.SRCALPHA)
 
         # game attributes
@@ -44,9 +48,9 @@ class Game:
         self.ui = UI(screen)
 
         # time
-        self.start_time = pygame.time.get_ticks()
         self.allow_input = True
-        self.timer_length = 300
+        self.timer_length = 225
+        self.start_time = pygame.time.get_ticks()
 
     def update_health(self, amount):
         self.cur_health += amount
@@ -93,7 +97,7 @@ class Game:
         self.hit_sound.set_volume(self.volume_gain * self.volume_effects * self.sound)
 
     def input(self):
-        if self.allow_input:
+        if not self.pause:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_p] and self.volume_gain < 1:
                 self.volume_gain += 0.01
@@ -108,11 +112,11 @@ class Game:
                     self.sound = False
                     self.allow_input = False
                     self.update_volume()
-                    self.input_timer()
+                    self.timer()
                 else:
                     self.sound = True
                     self.allow_input = False
-                    self.input_timer()
+                    self.timer()
                     self.update_volume()
             if keys[pygame.K_TAB]:
                 if self.pause:
@@ -120,24 +124,39 @@ class Game:
                 else:
                     self.pause = True
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE and not self.pause:
-                print('touche ECHAP apuyée !')
-                self.pause = True
+            if event.key == pygame.K_ESCAPE:
+                current_time = pygame.time.get_ticks()
+                if current_time - self.start_time > self.timer_length:
+                    if not self.pause:
+                        print('pause = True')
+                        self.pause = True
+                    else:
+                        print('pause = False')
+                        self.pause = False
 
-    def input_timer(self):
+                    self.start_time = current_time
+        if event.type == pygame.MOUSEBUTTONDOWN and self.pause:
+            if self.saves.collidepoint(event.pos):
+                self.pause = False
+
+
+    def timer(self):
         if not self.allow_input:
             current_time = pygame.time.get_ticks()
             if current_time - self.start_time >= self.timer_length:
-                print('----')
-                print(current_time)
-                print(self.start_time)
-                print(current_time - self.start_time)
                 self.allow_input = True
 
     def draw_pause(self):
-        pygame.draw.rect(self.surface,(128, 128, 128, 150), [0, 0, screen_width, screen_height])
+        pygame.draw.rect(self.surface, (128, 128, 128, 150), [0, 0, screen_width, screen_height])
+        pygame.draw.rect(self.surface, 'grey', [screen_width * 0.5 - 245, 200, 240, 80], 5, 10)
+        self.reset = pygame.draw.rect(self.surface, 'grey', [screen_width * 0.5 + 5, 200, 240, 80], 5, 10)
+        self.save = pygame.draw.rect(self.surface, 'grey', [screen_width * 0.5 - 120, 290, 240, 80], 5, 10)
+        self.surface.blit(self.font.render('Game Paused', True, 'black'), (screen_width * 0.5 - 125, 150))
+        self.surface.blit(self.font.render('Restart', True, 'black'), (screen_width * 0.5 + 50, 225))
+        self.surface.blit(self.font.render('Save', True, 'black'), (screen_width * 0.5 - 170, 225))
+        self.surface.blit(self.font.render('Resume', True, 'black'), (screen_width * 0.5 - 70, 315))
         screen.blit(self.surface, (0, 0))
-        print('pause active')
+        return self.reset, self.save
 
     def run(self):
         if self.status == 'overworld':
@@ -147,11 +166,11 @@ class Game:
             self.ui.show_health(self.cur_health, self.max_health)
             self.ui.show_coins(self.coins)
             self.check_game_over()
-        self.input_timer()
+        self.timer()
         self.input()
         self.ui.show_if_muted(self.sound, self.volume_gain)
         if self.pause:
-            self.draw_pause()
+            self.restart, self.saves = self.draw_pause()
 
 
 # Pygame setup

@@ -1,4 +1,5 @@
 import pygame
+
 from settings import screen_width
 
 
@@ -47,4 +48,4 @@ class UI:
             self.display_surface.blit(self.unmuted, self.if_muted_rect)
         else:
             self.display_surface.blit(self.muted, self.if_muted_rect)
- # NO COMMENT
+# NO COMMENT
