@@ -9,8 +9,11 @@ from ui import UI
 
 
 class Game:
+
     def __init__(self):
 
+        # pause and buttons
+        self.resume = None
         self.restart = None
         self.saves = None
         self.pause = False
@@ -78,12 +81,16 @@ class Game:
     def change_coins(self, count):
         self.coins += count
 
+    def if_pause(self, value):
+        self.pause = value
+
     def check_game_over(self):
         if self.cur_health <= 0:
             self.cur_health = 100
             self.coins = 0
             self.max_level = 0
-            self.overworld = Overworld(0, self.max_level, screen, self.create_level)
+            if self.status == 'level':
+                self.overworld = Overworld(0, self.max_level, screen, self.create_level)
             self.status = 'overworld'
             self.level_bg_music.stop()
             self.overworld_bg_music.play(loops=-1)
@@ -128,15 +135,19 @@ class Game:
                 current_time = pygame.time.get_ticks()
                 if current_time - self.start_time > self.timer_length:
                     if not self.pause:
-                        print('pause = True')
                         self.pause = True
                     else:
-                        print('pause = False')
                         self.pause = False
 
                     self.start_time = current_time
         if event.type == pygame.MOUSEBUTTONDOWN and self.pause:
+            if self.restart.collidepoint(event.pos):
+                if self.status == 'level':
+                    self.cur_health = 0
+                self.pause = False
             if self.saves.collidepoint(event.pos):
+                self.pause = False
+            if self.resume.collidepoint(event.pos):
                 self.pause = False
 
 
@@ -148,15 +159,36 @@ class Game:
 
     def draw_pause(self):
         pygame.draw.rect(self.surface, (128, 128, 128, 150), [0, 0, screen_width, screen_height])
-        pygame.draw.rect(self.surface, 'grey', [screen_width * 0.5 - 245, 200, 240, 80], 5, 10)
-        self.reset = pygame.draw.rect(self.surface, 'grey', [screen_width * 0.5 + 5, 200, 240, 80], 5, 10)
-        self.save = pygame.draw.rect(self.surface, 'grey', [screen_width * 0.5 - 120, 290, 240, 80], 5, 10)
+        self.restart = pygame.draw.rect(self.surface, 'white', [screen_width * 0.5 - 245, 200, 240, 80], 5, 10)
+        self.saves = pygame.draw.rect(self.surface, 'white', [screen_width * 0.5 + 5, 200, 240, 80], 5, 10)
+        self.resume = pygame.draw.rect(self.surface, 'white', [screen_width * 0.5 - 120, 290, 240, 80], 5, 10)
+        if event.type == pygame.MOUSEMOTION and self.pause:
+            if self.restart.collidepoint(event.pos):
+                self.restart = pygame.draw.rect(self.surface, '#2abd67', [screen_width * 0.5 - 245, 200, 240, 80], 10, 10)
+                self.restart = pygame.draw.rect(self.surface, '#078b33', [screen_width * 0.5 - 245, 200, 240, 80], 5,10)
+                self.change_cursor(True)
+            elif self.saves.collidepoint(event.pos):
+                self.saves = pygame.draw.rect(self.surface, '#f0bc10', [screen_width * 0.5 + 5, 200, 240, 80], 10, 10)
+                self.saves = pygame.draw.rect(self.surface, '#ee8b13', [screen_width * 0.5 + 5, 200, 240, 80], 5, 10)
+                self.change_cursor(True)
+            elif self.resume.collidepoint(event.pos):
+                self.resume = pygame.draw.rect(self.surface, '#f4654b', [screen_width * 0.5 - 120, 290, 240, 80], 10, 10)
+                self.resume = pygame.draw.rect(self.surface, '#cb3c1c', [screen_width * 0.5 - 120, 290, 240, 80], 5, 10)
+                self.change_cursor(True)
+            else:
+                self.change_cursor(False)
         self.surface.blit(self.font.render('Game Paused', True, 'black'), (screen_width * 0.5 - 125, 150))
         self.surface.blit(self.font.render('Restart', True, 'black'), (screen_width * 0.5 + 50, 225))
         self.surface.blit(self.font.render('Save', True, 'black'), (screen_width * 0.5 - 170, 225))
         self.surface.blit(self.font.render('Resume', True, 'black'), (screen_width * 0.5 - 70, 315))
         screen.blit(self.surface, (0, 0))
-        return self.reset, self.save
+        return self.restart, self.saves, self.resume
+
+    def change_cursor(self, should_change):
+        if should_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def run(self):
         if self.status == 'overworld':
@@ -170,7 +202,7 @@ class Game:
         self.input()
         self.ui.show_if_muted(self.sound, self.volume_gain)
         if self.pause:
-            self.restart, self.saves = self.draw_pause()
+            self.restart, self.saves, self.resume = self.draw_pause()
 
 
 # Pygame setup

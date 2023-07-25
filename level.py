@@ -139,7 +139,7 @@ class Level:
                         if val == '1': sprite = Palm(tile_size, x, y, 'venv/graphics/terrain/palm_large', 70)
 
                     if type == 'enemies':
-                        sprite = Enemy(tile_size, x, y, self.pause)
+                        sprite = Enemy(tile_size, x, y)
 
                     if type == 'constraints':
                         sprite = Tile(tile_size, x, y)

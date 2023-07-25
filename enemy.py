@@ -1,20 +1,18 @@
 from random import randint
 
 import pygame
-
 from tiles import AnimatedTile
 
 
 class Enemy(AnimatedTile):
-    def __init__(self, size, x, y, pause):
+    def __init__(self, size, x, y):
         super().__init__(size, x, y, 'venv/graphics/enemy/run')
         self.rect.y += size - self.image.get_size()[1]
         self.speed = randint(1, 2)
         self.pause = pause
 
     def move(self):
-        if not self.pause:
-            self.rect.x += self.speed
+        self.rect.x += self.speed
 
     def reverse_image(self):
         if self.speed > 0:
