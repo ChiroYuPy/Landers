@@ -9,7 +9,6 @@ class Enemy(AnimatedTile):
         super().__init__(size, x, y, 'venv/graphics/enemy/run')
         self.rect.y += size - self.image.get_size()[1]
         self.speed = randint(1, 2)
-        self.pause = pause
 
     def move(self):
         self.rect.x += self.speed
