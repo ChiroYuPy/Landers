@@ -1,41 +1,28 @@
-#!/usr/bin/python3.4
-# PYGAME 1.x ONLY
-# Setup Python ----------------------------------------------- #
-import pygame, sys
+import pygame_widgets
+import pygame
+from pygame_widgets.slider import Slider
+from pygame_widgets.textbox import TextBox
 
-# Setup pygame/window ---------------------------------------- #
-mainClock = pygame.time.Clock()
-from pygame.locals import VIDEORESIZE,QUIT,KEYDOWN,K_ESCAPE,K_F11
 pygame.init()
-pygame.display.set_caption('game base')
-monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
-screen = pygame.display.set_mode((500, 500), pygame.RESIZABLE)
+win = pygame.display.set_mode((1000, 600))
 
-fullscreen = False
+slider = Slider(win, 100, 100, 800, 40, min=0, max=99, step=1)
+output = TextBox(win, 475, 200, 50, 50, fontSize=30)
 
-while True:
+output.disable()  # Act as label instead of textbox
 
-    screen.fill((0, 0, 50))
-
-    pygame.draw.rect(screen, (255, 0, 0), pygame.Rect(screen.get_width() - 5 - (screen.get_width() / 5), 50, screen.get_width() / 5, 50))
-
-    for event in pygame.event.get():
-        if event.type == QUIT:
+run = True
+while run:
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.QUIT:
             pygame.quit()
-            sys.exit()
-        if event.type == VIDEORESIZE:
-            if not fullscreen:
-                screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-        if event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
-                pygame.quit()
-                sys.exit()
-            if event.key == K_F11:
-                fullscreen = not fullscreen
-                if fullscreen:
-                    screen = pygame.display.set_mode(monitor_size, pygame.FULLSCREEN)
-                else:
-                    screen = pygame.display.set_mode((screen.get_width(), screen.get_height()), pygame.RESIZABLE)
+            run = False
+            quit()
 
+    win.fill((255, 255, 255))
+
+    output.setText(slider.getValue())
+
+    pygame_widgets.update(events)
     pygame.display.update()
-    mainClock.tick(60)

@@ -1,13 +1,15 @@
 import sys
-
 import tkinter as tk
+import pygame_widgets
+from pygame_widgets.slider import Slider
+from pygame_widgets.textbox import TextBox
 import pygame
 from pygame.locals import VIDEORESIZE,KEYDOWN,K_ESCAPE,K_F11
-
 from level import Level
 from overworld import Overworld
 from settings import *
 from ui import UI
+
 
 class Game:
 
@@ -37,8 +39,11 @@ class Game:
         self.volume_effects = 1
 
         # audio
+        self.volume_gain = int(pygame_widgets.slider.Slider.getValue(slider1))/100
+        self.volume_musics = int(pygame_widgets.slider.Slider.getValue(slider2))/10
+        self.volume_effects = int(pygame_widgets.slider.Slider.getValue(slider3))/10
         self.music_volume_multiplicator = (self.volume_gain * self.volume_musics * self.sound)
-        self.effect_volume_multiplicator = (self.volume_gain * self.volume_musics * self.sound)
+        self.effect_volume_multiplicator = (self.volume_gain * self.volume_effects * self.sound)
 
         self.level_bg_music = pygame.mixer.Sound('venv/audio/level_music.wav')
         self.overworld_bg_music = pygame.mixer.Sound('venv/audio/overworld_music.wav')
@@ -103,8 +108,11 @@ class Game:
             self.overworld_bg_music.play(loops=-1)
 
     def update_volume(self):
+        self.volume_gain = int(pygame_widgets.slider.Slider.getValue(slider1))/100
+        self.volume_musics = int(pygame_widgets.slider.Slider.getValue(slider2))/10
+        self.volume_effects = int(pygame_widgets.slider.Slider.getValue(slider3))/10
         self.music_volume_multiplicator = (self.volume_gain * self.volume_musics * self.sound)
-        self.effect_volume_multiplicator = (self.volume_gain * self.volume_musics * self.sound)
+        self.effect_volume_multiplicator = (self.volume_gain * self.volume_effects * self.sound)
         self.level_bg_music.set_volume(self.music_volume_multiplicator)
         self.overworld_bg_music.set_volume(self.music_volume_multiplicator)
         self.coin_sound.set_volume(self.effect_volume_multiplicator)
@@ -162,18 +170,9 @@ class Game:
             if self.resume.collidepoint(event.pos):
                 self.pause = False
                 self.click_sound.play()
-            if self.volume_add.collidepoint(event.pos):
-                if self.volume_gain > 0:
-                    self.volume_gain -= 0.01
-                    self.update_volume()
                 self.pause = True
                 self.click_sound.play()
-            if self.volume_remove.collidepoint(event.pos):
-                if self.volume_gain < 1:
-                    self.volume_gain += 0.01
-                    self.update_volume()
-                self.pause = True
-                self.click_sound.play()
+
 
     def timer(self):
         if not self.allow_input:
@@ -189,7 +188,7 @@ class Game:
         self.resume = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 - 120, 290, 240, 80], 5, 10)
         self.volume_add = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 + 20, 380, 80, 80], 5, 10)
         self.volume_remove = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 - 240, 380, 80, 80], 5, 10)
-        self.if_sound = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 + 160, 380, 80, 80], 5, 10)
+        self.if_sound = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 + 130, 290, 115, 80], 5, 10)
         self.surface.blit(self.font2.render('+', True, '#666666'), (screen_width * 0.5 - 215, 390))
         self.surface.blit(self.font2.render('-', True, '#666666'), (screen_width * 0.5 + 45, 390))
         if event.type == pygame.MOUSEMOTION and self.pause:
@@ -216,8 +215,8 @@ class Game:
                 self.surface.blit(self.font2.render('+', True, '#2abd67'), (screen_width * 0.5 - 215, 390))
                 self.change_cursor(True)
             elif self.if_sound.collidepoint(event.pos):
-                self.if_sound = pygame.draw.rect(self.surface, '#f4654b', [screen_width * 0.5 + 160, 380, 80, 80], 10, 10)
-                self.if_sound = pygame.draw.rect(self.surface, '#cb3c1c', [screen_width * 0.5 + 160, 380, 80, 80], 5, 10)
+                self.if_sound = pygame.draw.rect(self.surface, '#f4654b', [screen_width * 0.5 + 130, 290, 115, 80], 10, 10)
+                self.if_sound = pygame.draw.rect(self.surface, '#cb3c1c', [screen_width * 0.5 + 130, 290, 115, 80], 5, 10)
                 self.change_cursor(True)
             else:
                 self.change_cursor(False)
@@ -226,7 +225,12 @@ class Game:
         self.surface.blit(self.font.render('Save', True, '#000000'), (screen_width * 0.5 - 170, 225))
         self.surface.blit(self.font.render('Resume', True, '#000000'), (screen_width * 0.5 - 70, 315))
         self.surface.blit(self.font.render(str(int(self.volume_gain*10)/10), True, '#000000'), (screen_width * 0.5 - 100, 405))
+        self.update_volume()
         screen.blit(self.surface, (0, 0))
+
+        pygame_widgets.update(event)
+        pygame.display.update()
+
         return self.restart, self.saves, self.resume
 
     def change_cursor(self, should_change):
@@ -257,6 +261,9 @@ pygame.display.set_caption('Landers - V0.2.5')
 pygame_icon = pygame.image.load('venv\\graphics\\tilesTEST.png')
 pygame.display.set_icon(pygame_icon)
 screen = pygame.display.set_mode((screen_width, screen_height))
+slider1 = Slider(screen, int(screen_width/2-230), int(screen_height/2+120), 360, 20, min=0, max=100, step=1, initial=5)
+slider2 = Slider(screen, int(screen_width/2-230), int(screen_height/2+160), 360, 20, min=0, max=100, step=1, initial=5)
+slider3 = Slider(screen, int(screen_width/2-230), int(screen_height/2+200), 360, 20, min=0, max=100, step=1, initial=5)
 root = tk.Tk()
 monitor_size = [root.winfo_screenwidth(), root.winfo_screenheight()]
 clock = pygame.time.Clock()
@@ -264,7 +271,8 @@ clock = pygame.time.Clock()
 game = Game()
 
 while True:
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
@@ -279,8 +287,9 @@ while True:
                 else:
                     screen = pygame.display.set_mode((screen_width, screen_height))
 
-    screen.fill('#DCDDD8')
     game.run()
+
 
     pygame.display.update()
     clock.tick(60)
+
