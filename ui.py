@@ -1,6 +1,6 @@
 import pygame
 
-from settings import screen_width
+from settings import screen_width, screen_height
 
 
 class UI:
@@ -10,18 +10,18 @@ class UI:
 
         # health
         self.health_bar = pygame.image.load('venv/graphics/ui/health_bar.png').convert_alpha()
-        self.health_bar_topleft = (54, 39)
+        self.health_bar_topleft = (50, 40)
         self.bar_max_width = 152
         self.bar_height = 4
 
         # coins
         self.coin = pygame.image.load('venv/graphics/ui/coin.png').convert_alpha()
-        self.coin_rect = self.coin.get_rect(topleft=(50, 61))
+        self.coin_rect = self.coin.get_rect(topleft=(screen_width /2 - 20, 30))
 
         # if muted
         self.unmuted = pygame.image.load('venv/graphics/ui/unmute.png').convert_alpha()
         self.muted = pygame.image.load('venv/graphics/ui/mute.png').convert_alpha()
-        self.if_muted_rect = self.coin.get_rect(topright=(screen_width - 100, 20))
+        self.if_muted_rect = self.coin.get_rect(topright=(screen_width - 52, screen_height-80))
 
         # font
         self.font = pygame.font.Font('venv/graphics/ui/ARCADEPI.ttf', 30)
@@ -42,12 +42,7 @@ class UI:
             self.display_surface.blit(coin_amount_surf, coin_amount_rect)
 
     def show_if_muted(self, sound, volume_gain, pause):
-        if not pause:
-            if_muted_amount_surf = self.font.render(str(int(volume_gain*10)/10), False, '#33323d')
-            if_muted_amount_rect = if_muted_amount_surf.get_rect(
-                midleft=(self.if_muted_rect.right + 4, self.if_muted_rect.centery))
-            self.display_surface.blit(if_muted_amount_surf, if_muted_amount_rect)
-            if sound:
-                self.display_surface.blit(self.unmuted, self.if_muted_rect)
-            else:
-                self.display_surface.blit(self.muted, self.if_muted_rect)
+        if sound:
+            self.display_surface.blit(self.unmuted, self.if_muted_rect)
+        else:
+            self.display_surface.blit(self.muted, self.if_muted_rect)

@@ -2,7 +2,6 @@ import sys
 import tkinter as tk
 import pygame_widgets
 from pygame_widgets.slider import Slider
-from pygame_widgets.textbox import TextBox
 import pygame
 from pygame.locals import VIDEORESIZE,KEYDOWN,K_ESCAPE,K_F11
 from level import Level
