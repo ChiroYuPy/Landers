@@ -43,7 +43,7 @@ class UI:
 
     def show_if_muted(self, sound, volume_gain, pause):
         if not pause:
-            if_muted_amount_surf = self.font.render(str(volume_gain), False, '#33323d')
+            if_muted_amount_surf = self.font.render(str(int(volume_gain*10)/10), False, '#33323d')
             if_muted_amount_rect = if_muted_amount_surf.get_rect(
                 midleft=(self.if_muted_rect.right + 4, self.if_muted_rect.centery))
             self.display_surface.blit(if_muted_amount_surf, if_muted_amount_rect)

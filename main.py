@@ -1,12 +1,13 @@
 import sys
 
+import tkinter as tk
 import pygame
+from pygame.locals import VIDEORESIZE,KEYDOWN,K_ESCAPE,K_F11
 
 from level import Level
 from overworld import Overworld
 from settings import *
 from ui import UI
-
 
 class Game:
 
@@ -22,6 +23,7 @@ class Game:
         self.pause = False
 
         self.font = pygame.font.Font('venv/graphics/ui/ARCADEPI.ttf', 32)
+        self.font2 = pygame.font.Font('venv/graphics/ui/ARCADEPI.ttf', 64)
         self.surface = pygame.Surface([screen_width, screen_height], pygame.SRCALPHA)
 
         # game attributes
@@ -35,6 +37,9 @@ class Game:
         self.volume_effects = 1
 
         # audio
+        self.music_volume_multiplicator = (self.volume_gain * self.volume_musics * self.sound)
+        self.effect_volume_multiplicator = (self.volume_gain * self.volume_musics * self.sound)
+
         self.level_bg_music = pygame.mixer.Sound('venv/audio/level_music.wav')
         self.overworld_bg_music = pygame.mixer.Sound('venv/audio/overworld_music.wav')
         self.coin_sound = pygame.mixer.Sound('venv/audio/effects/coin.wav')
@@ -98,13 +103,15 @@ class Game:
             self.overworld_bg_music.play(loops=-1)
 
     def update_volume(self):
-        self.level_bg_music.set_volume(self.volume_gain * self.volume_musics * self.sound)
-        self.overworld_bg_music.set_volume(self.volume_gain * self.volume_musics * self.sound)
-        self.coin_sound.set_volume(self.volume_gain * self.volume_effects * self.sound)
-        self.stomp_sound.set_volume(self.volume_gain * self.volume_effects * self.sound)
-        self.jump_sound.set_volume(self.volume_gain * self.volume_effects * self.sound)
-        self.hit_sound.set_volume(self.volume_gain * self.volume_effects * self.sound)
-        self.click_sound.set_volume(self.volume_gain * self.volume_effects * self.sound)
+        self.music_volume_multiplicator = (self.volume_gain * self.volume_musics * self.sound)
+        self.effect_volume_multiplicator = (self.volume_gain * self.volume_musics * self.sound)
+        self.level_bg_music.set_volume(self.music_volume_multiplicator)
+        self.overworld_bg_music.set_volume(self.music_volume_multiplicator)
+        self.coin_sound.set_volume(self.effect_volume_multiplicator)
+        self.stomp_sound.set_volume(self.effect_volume_multiplicator)
+        self.jump_sound.set_volume(self.effect_volume_multiplicator)
+        self.hit_sound.set_volume(self.effect_volume_multiplicator)
+        self.click_sound.set_volume(self.effect_volume_multiplicator)
 
     def input(self):
         if not self.pause:
@@ -145,17 +152,28 @@ class Game:
                     self.start_time = current_time
         if event.type == pygame.MOUSEBUTTONDOWN and self.pause:
             if self.restart.collidepoint(event.pos):
-                if self.status == 'level':
-                    self.cur_health = 0
                 self.pause = False
                 self.click_sound.play()
             if self.saves.collidepoint(event.pos):
+                if self.status == 'level':
+                    self.cur_health = 0
                 self.pause = False
                 self.click_sound.play()
             if self.resume.collidepoint(event.pos):
                 self.pause = False
                 self.click_sound.play()
-
+            if self.volume_add.collidepoint(event.pos):
+                if self.volume_gain > 0:
+                    self.volume_gain -= 0.01
+                    self.update_volume()
+                self.pause = True
+                self.click_sound.play()
+            if self.volume_remove.collidepoint(event.pos):
+                if self.volume_gain < 1:
+                    self.volume_gain += 0.01
+                    self.update_volume()
+                self.pause = True
+                self.click_sound.play()
 
     def timer(self):
         if not self.allow_input:
@@ -166,20 +184,22 @@ class Game:
     def draw_pause(self):
         pygame.draw.rect(self.surface, (128, 128, 128, 150), [0, 0, screen_width, screen_height])
         pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 - 150, 380, 160, 80], 5, 10)
-        self.restart = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 - 245, 200, 240, 80], 5, 10)
-        self.saves = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 + 5, 200, 240, 80], 5, 10)
+        self.saves = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 - 245, 200, 240, 80], 5, 10)
+        self.restart = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 + 5, 200, 240, 80], 5, 10)
         self.resume = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 - 120, 290, 240, 80], 5, 10)
         self.volume_add = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 + 20, 380, 80, 80], 5, 10)
         self.volume_remove = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 - 240, 380, 80, 80], 5, 10)
         self.if_sound = pygame.draw.rect(self.surface, '#ffffff', [screen_width * 0.5 + 160, 380, 80, 80], 5, 10)
+        self.surface.blit(self.font2.render('+', True, '#666666'), (screen_width * 0.5 - 215, 390))
+        self.surface.blit(self.font2.render('-', True, '#666666'), (screen_width * 0.5 + 45, 390))
         if event.type == pygame.MOUSEMOTION and self.pause:
-            if self.restart.collidepoint(event.pos):
-                self.restart = pygame.draw.rect(self.surface, '#2abd67', [screen_width * 0.5 - 245, 200, 240, 80], 10, 10)
-                self.restart = pygame.draw.rect(self.surface, '#078b33', [screen_width * 0.5 - 245, 200, 240, 80], 5, 10)
+            if self.saves.collidepoint(event.pos):
+                self.saves = pygame.draw.rect(self.surface, '#2abd67', [screen_width * 0.5 - 245, 200, 240, 80], 10, 10)
+                self.saves = pygame.draw.rect(self.surface, '#078b33', [screen_width * 0.5 - 245, 200, 240, 80], 5, 10)
                 self.change_cursor(True)
-            elif self.saves.collidepoint(event.pos):
-                self.saves = pygame.draw.rect(self.surface, '#f0bc10', [screen_width * 0.5 + 5, 200, 240, 80], 10, 10)
-                self.saves = pygame.draw.rect(self.surface, '#ee8b13', [screen_width * 0.5 + 5, 200, 240, 80], 5, 10)
+            elif self.restart.collidepoint(event.pos):
+                self.restart = pygame.draw.rect(self.surface, '#f0bc10', [screen_width * 0.5 + 5, 200, 240, 80], 10, 10)
+                self.restart = pygame.draw.rect(self.surface, '#ee8b13', [screen_width * 0.5 + 5, 200, 240, 80], 5, 10)
                 self.change_cursor(True)
             elif self.resume.collidepoint(event.pos):
                 self.resume = pygame.draw.rect(self.surface, '#f4654b', [screen_width * 0.5 - 120, 290, 240, 80], 10, 10)
@@ -188,10 +208,12 @@ class Game:
             elif self.volume_add.collidepoint(event.pos):
                 self.volume_add = pygame.draw.rect(self.surface, '#f4654b', [screen_width * 0.5 + 20, 380, 80, 80], 10, 10)
                 self.volume_add = pygame.draw.rect(self.surface, '#cb3c1c', [screen_width * 0.5 + 20, 380, 80, 80], 5, 10)
+                self.surface.blit(self.font2.render('-', True, '#f4654b'), (screen_width * 0.5 + 45, 390))
                 self.change_cursor(True)
             elif self.volume_remove.collidepoint(event.pos):
-                self.volume_remove = pygame.draw.rect(self.surface, '#f4654b', [screen_width * 0.5 - 240, 380, 80, 80], 10, 10)
-                self.volume_remove = pygame.draw.rect(self.surface, '#cb3c1c', [screen_width * 0.5 - 240, 380, 80, 80], 5, 10)
+                self.volume_remove = pygame.draw.rect(self.surface, '#2abd67', [screen_width * 0.5 - 240, 380, 80, 80], 10, 10)
+                self.volume_remove = pygame.draw.rect(self.surface, '#078b33', [screen_width * 0.5 - 240, 380, 80, 80], 5, 10)
+                self.surface.blit(self.font2.render('+', True, '#2abd67'), (screen_width * 0.5 - 215, 390))
                 self.change_cursor(True)
             elif self.if_sound.collidepoint(event.pos):
                 self.if_sound = pygame.draw.rect(self.surface, '#f4654b', [screen_width * 0.5 + 160, 380, 80, 80], 10, 10)
@@ -203,7 +225,7 @@ class Game:
         self.surface.blit(self.font.render('Restart', True, '#000000'), (screen_width * 0.5 + 50, 225))
         self.surface.blit(self.font.render('Save', True, '#000000'), (screen_width * 0.5 - 170, 225))
         self.surface.blit(self.font.render('Resume', True, '#000000'), (screen_width * 0.5 - 70, 315))
-        self.surface.blit(self.font.render(str(self.volume_gain), True, '#000000'), (screen_width * 0.5 - 100, 405))
+        self.surface.blit(self.font.render(str(int(self.volume_gain*10)/10), True, '#000000'), (screen_width * 0.5 - 100, 405))
         screen.blit(self.surface, (0, 0))
         return self.restart, self.saves, self.resume
 
@@ -214,16 +236,17 @@ class Game:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def run(self):
+
         if self.status == 'overworld':
             self.overworld.run()
         else:
             self.level.run()
-            self.ui.show_health(self.cur_health, self.max_health, self.pause)
-            self.ui.show_coins(self.coins, self.pause)
             self.check_game_over()
         self.timer()
         self.input()
         self.ui.show_if_muted(self.sound, self.volume_gain, self.pause)
+        self.ui.show_health(self.cur_health, self.max_health, self.pause)
+        self.ui.show_coins(self.coins, self.pause)
         if self.pause:
             self.restart, self.saves, self.resume = self.draw_pause()
 
@@ -234,6 +257,8 @@ pygame.display.set_caption('Landers - V0.2.5')
 pygame_icon = pygame.image.load('venv\\graphics\\tilesTEST.png')
 pygame.display.set_icon(pygame_icon)
 screen = pygame.display.set_mode((screen_width, screen_height))
+root = tk.Tk()
+monitor_size = [root.winfo_screenwidth(), root.winfo_screenheight()]
 clock = pygame.time.Clock()
 
 game = Game()
@@ -243,6 +268,16 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == VIDEORESIZE:
+            if not fullscreen:
+                screen = pygame.display.set_mode((event.w, event.h))
+        if event.type == KEYDOWN:
+            if event.key == K_F11:
+                fullscreen = not fullscreen
+                if fullscreen:
+                    screen = pygame.display.set_mode(monitor_size, pygame.FULLSCREEN)
+                else:
+                    screen = pygame.display.set_mode((screen_width, screen_height))
 
     screen.fill('#DCDDD8')
     game.run()
