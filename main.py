@@ -1,13 +1,52 @@
 import sys
-import tkinter as tk
-import pygame_widgets
-from pygame_widgets.slider import Slider
 import pygame
-from pygame.locals import VIDEORESIZE,KEYDOWN,K_ESCAPE,K_F11
+import pygame_widgets
+import pickle
+from pygame_widgets.slider import Slider
+from pygame.locals import VIDEORESIZE,KEYDOWN,K_F11
 from level import Level
 from overworld import Overworld
 from settings import *
 from ui import UI
+
+
+class Data:
+
+    def save_data(data):
+        with open('data/settings.cfg', 'wb') as f:
+            pickle.dump(data, f)
+
+    def load_data():
+        try:
+            with open('data/settings.cfg', 'rb') as f:
+                data = pickle.load(f)
+                return data
+        except FileNotFoundError:
+            return None
+
+    def main():
+        # Load data from file (if exists)
+        saved_data = load_data()
+        if saved_data is not None:
+            # Utilisez les données chargées dans votre programme
+            game.max_level = saved_data['max_level']
+            game.cur_health = saved_data['cur_health']
+            game.coins = saved_data['coins']
+            game.sound = saved_data['sound']
+            # Chargez d'autres données comme cela...
+
+        # Le reste de votre programme principal...
+
+        # Save data before exiting
+        data_to_save = {
+            'max_level': game.max_level,
+            'cur_health': game.cur_health,
+            'coins': game.coins,
+            'sound': game.sound,
+            # Sauvegardez d'autres données comme cela...
+        }
+        save_data(data_to_save)
+
 
 
 class Game:
@@ -157,20 +196,6 @@ class Game:
                         self.pause = False
 
                     self.start_time = current_time
-        if event.type == pygame.MOUSEBUTTONDOWN and self.pause:
-            if self.restart.collidepoint(event.pos):
-                self.pause = False
-                self.click_sound.play()
-            if self.saves.collidepoint(event.pos):
-                if self.status == 'level':
-                    self.cur_health = 0
-                self.pause = False
-                self.click_sound.play()
-            if self.resume.collidepoint(event.pos):
-                self.pause = False
-                self.click_sound.play()
-                self.pause = True
-                self.click_sound.play()
 
 
     def timer(self):
@@ -223,9 +248,23 @@ class Game:
         self.surface.blit(self.font.render('Restart', True, '#000000'), (screen_width * 0.5 + 50, 225))
         self.surface.blit(self.font.render('Save', True, '#000000'), (screen_width * 0.5 - 170, 225))
         self.surface.blit(self.font.render('Resume', True, '#000000'), (screen_width * 0.5 - 70, 315))
-        self.surface.blit(self.font.render(str(int(self.volume_gain*10)/10), True, '#000000'), (screen_width * 0.5 - 100, 405))
+        self.surface.blit(self.font.render(str(int(self.volume_gain * 100)), True, '#df6c00'), (screen_width/2+150, screen_height/2+115))
+        self.surface.blit(self.font.render(str(int(self.volume_musics * 10)), True, '#df6c00'), (screen_width/2+150, screen_height/2+155))
+        self.surface.blit(self.font.render(str(int(self.volume_effects * 10)), True, '#df6c00'), (screen_width/2+150, screen_height/2+195))
         self.update_volume()
         screen.blit(self.surface, (0, 0))
+        if event.type == pygame.MOUSEBUTTONDOWN and self.pause:
+            if self.restart.collidepoint(event.pos):
+                if self.status == 'level':
+                    self.cur_health = 0
+                self.pause = False
+                self.click_sound.play()
+            if self.saves.collidepoint(event.pos):
+                self.pause = False
+                self.click_sound.play()
+            if self.resume.collidepoint(event.pos):
+                self.pause = False
+                self.click_sound.play()
 
         pygame_widgets.update(event)
         pygame.display.update()
@@ -254,20 +293,20 @@ class Game:
             self.restart, self.saves, self.resume = self.draw_pause()
 
 
-# Pygame setup
-pygame.init()
-pygame.display.set_caption('Landers - V0.2.5')
-pygame_icon = pygame.image.load('venv\\graphics\\tilesTEST.png')
-pygame.display.set_icon(pygame_icon)
-screen = pygame.display.set_mode((screen_width, screen_height))
-slider1 = Slider(screen, int(screen_width/2-230), int(screen_height/2+120), 360, 20, min=0, max=100, step=1, initial=5)
-slider2 = Slider(screen, int(screen_width/2-230), int(screen_height/2+160), 360, 20, min=0, max=100, step=1, initial=5)
-slider3 = Slider(screen, int(screen_width/2-230), int(screen_height/2+200), 360, 20, min=0, max=100, step=1, initial=5)
-root = tk.Tk()
-monitor_size = [root.winfo_screenwidth(), root.winfo_screenheight()]
-clock = pygame.time.Clock()
+if __name__ == '__main__':
+    pygame.init()
+    pygame.display.set_caption('Landers - V0.2.5')
+    pygame_icon = pygame.image.load('venv\\graphics\\tilesTEST.png')
+    pygame.display.set_icon(pygame_icon)
+    screen = pygame.display.set_mode((screen_width, screen_height))
+    slider1 = Slider(screen, int(screen_width/2-230), int(screen_height/2+120), 360, 20, min=0, max=100, step=1, initial=5)
+    slider2 = Slider(screen, int(screen_width/2-230), int(screen_height/2+160), 360, 20, min=0, max=100, step=1, initial=5)
+    slider3 = Slider(screen, int(screen_width/2-230), int(screen_height/2+200), 360, 20, min=0, max=100, step=1, initial=5)
+    root = tk.Tk()
+    monitor_size = [root.winfo_screenwidth(), root.winfo_screenheight()]
+    clock = pygame.time.Clock()
 
-game = Game()
+    game = Game()
 
 while True:
     events = pygame.event.get()
