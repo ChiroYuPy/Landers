@@ -2,4 +2,4 @@
 
 Landers Python Plateform Game
 
-# This is my first project send on git !
+# This is a simple platformer game like mario !
